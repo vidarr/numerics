@@ -84,6 +84,22 @@ static int smallest_common_multiple_test() {
 
 /*----------------------------------------------------------------------------*/
 
+static int is_even_test() {
+
+    for(uint64_t n = 2; n < 100000; n += 2) {
+        assert(is_even(n));
+    }
+
+    for(uint64_t n = 1; n < 100000; n += 2) {
+        assert(! is_even(n));
+    }
+
+    return EXIT_SUCCESS;
+
+}
+
+/*----------------------------------------------------------------------------*/
+
 static int is_prime_test() {
     assert(!is_prime(4));
     assert(!is_prime(6));
@@ -105,6 +121,57 @@ static int is_prime_test() {
     assert(!is_prime(7919 + 1));
 
     return EXIT_SUCCESS;
+}
+
+/*----------------------------------------------------------------------------*/
+
+static int is_large_prime_test() {
+
+    // Since this function also works on small primes, check them first
+
+    for(uint64_t n = 3; n < 10000; ++n) {
+
+        if(is_prime(n)) {
+            assert(is_large_prime(n));
+            continue;
+        }
+
+        assert( ! is_large_prime(n));
+
+    }
+
+    // Now check some greater numbers
+
+    assert(is_large_prime(152029));
+    assert(is_large_prime(430907));
+    assert(is_large_prime(604973));
+
+    assert(is_large_prime(101701));
+
+    for(uint64_t n = 101701 + 1; n < 101719; ++n) {
+        assert(! is_large_prime(n));
+    }
+
+    assert(is_large_prime(101719));
+
+    return EXIT_SUCCESS;
+
+}
+
+/*----------------------------------------------------------------------------*/
+
+static int passes_rabin_miller_test() {
+
+    for(uint64_t i = 3; i < 100000; ++i) {
+
+        if(! is_prime(i)) continue;
+
+        assert(passes_rabin_miller(i));
+
+    }
+
+    return EXIT_SUCCESS;
+
 }
 
 /*----------------------------------------------------------------------------*/
@@ -179,11 +246,16 @@ static int random_range_test() {
 /*----------------------------------------------------------------------------*/
 
 int main(int argc, char** argv) {
+
     greatest_common_divisor_test();
     smallest_common_multiple_test();
+    is_even_test();
     is_prime_test();
+    is_large_prime_test();
+    passes_rabin_miller_test();
     next_prime_factor_test();
     random_range_test();
+
 }
 
 /*---------------------------------------------------------------------------*/

@@ -41,6 +41,7 @@
 #include <limits.h>
 #include <math.h>
 #include <stdlib.h>
+#include <stdio.h>
 
 /*---------------------------------------------------------------------------*/
 
@@ -53,6 +54,32 @@ int64_t llmax(int64_t n, int64_t m) {
 
 int64_t llmin(int64_t n, int64_t m) {
     if (n < m) return n;
+    return m;
+}
+
+/*----------------------------------------------------------------------------*/
+
+uint64_t a_raised_to_d_mod_n(uint64_t a, uint64_t d, uint64_t n) {
+
+    uint64_t m = a;
+
+    while (n <= m) {
+        m -= n;
+    }
+
+    for (uint64_t round = 1; round < d; ++round) {
+
+        assert(m < n);
+
+        m *= a;
+
+        while (n <= m) {
+            m -= n;
+        }
+
+        assert(m < n);
+    }
+
     return m;
 }
 
@@ -157,6 +184,14 @@ uint64_t smallest_common_multiple(const int64_t n, const int64_t m) {
 /*----------------------------------------------------------------------------*/
 
 bool is_prime(uint64_t p) {
+    if (2 == p) {
+        return true;
+    }
+
+    if (is_even(p)) {
+        return false;
+    }
+
     uint64_t last_factor_to_check = sqrt(p) + 1;
 
     for (uint64_t factor = 2; factor < last_factor_to_check; ++factor) {
@@ -168,6 +203,62 @@ bool is_prime(uint64_t p) {
     }
 
     return true;
+}
+
+/*----------------------------------------------------------------------------*/
+
+bool is_large_prime(uint64_t p) {
+
+    if (!passes_rabin_miller(p)) {
+        return false;
+    }
+
+    return is_prime(p);
+}
+
+/*----------------------------------------------------------------------------*/
+
+bool passes_rabin_miller(uint64_t n) {
+    if (2 == n) {
+        return true;
+    }
+
+    if (is_even(n)) {
+        return false;
+    }
+
+    uint64_t n_minus_1 = n - 1;
+
+    uint64_t twos_exponent = 0;
+    uint64_t twos_factor = 1;
+    uint64_t d = n_minus_1;
+
+    assert(is_even(d));
+
+    for (twos_exponent = 0; is_even(d); ++twos_exponent) {
+        twos_factor *= 2;
+        d /= 2;
+    }
+
+    uint64_t a = random_range(2, n_minus_1);
+    assert(2 <= a);
+    assert(a <= n_minus_1);
+
+    uint64_t m = a_raised_to_d_mod_n(a, d, n);
+
+    if (1 == m) return true;
+
+    // Now we got our special case:
+
+    uint64_t last_m = m;
+
+    for (uint64_t r = 0; r < twos_exponent; ++r) {
+        last_m = m;
+        m = a_raised_to_d_mod_n(m, 2, n);
+        if (1 == m) break;
+    }
+
+    return (m == 1) && (n - 1 == last_m);
 }
 
 /*----------------------------------------------------------------------------*/
